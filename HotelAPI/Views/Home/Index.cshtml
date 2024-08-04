@@ -1,0 +1,117 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotel SPA</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <style>
+        body {
+            padding-top: 50px;
+        }
+        .container {
+            max-width: 800px;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+    <a class="navbar-brand" href="#">Hotel SPA</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="#quartos">Quartos</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#reservar">Reservar</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#minhas-reservas">Minhas Reservas</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<div class="container mt-5">
+    <div id="quartos" class="my-5">
+        <h2>Quartos Disponíveis</h2>
+        <div class="row">
+            <!-- Quartos serão carregados aqui dinamicamente -->
+            <div class="col-md-4 mb-4" id="quarto-template" style="display: none;">
+                <div class="card">
+                    <img src="" class="card-img-top" alt="Imagem do Quarto">
+                    <div class="card-body">
+                        <h5 class="card-title">Nome do Quarto</h5>
+                        <p class="card-text">Descrição do Quarto</p>
+                        <button class="btn btn-primary">Reservar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="reservar" class="my-5">
+        <h2>Fazer Reserva</h2>
+        <form>
+            <div class="form-group">
+                <label for="clienteNome">Nome</label>
+                <input type="text" class="form-control" id="clienteNome" placeholder="Seu nome">
+            </div>
+            <div class="form-group">
+                <label for="clienteEmail">Email</label>
+                <input type="email" class="form-control" id="clienteEmail" placeholder="Seu email">
+            </div>
+            <div class="form-group">
+                <label for="quartoSelecionado">Quarto</label>
+                <select class="form-control" id="quartoSelecionado">
+                    <!-- Opções de quartos serão carregadas aqui dinamicamente -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="dataEntrada">Data de Entrada</label>
+                <input type="date" class="form-control" id="dataEntrada">
+            </div>
+            <div class="form-group">
+                <label for="dataSaida">Data de Saida</label>
+                <input type="date" class="form-control" id="dataSaida">
+            </div>
+            <button type="submit" class="btn btn-primary">Reservar</button>
+        </form>
+    </div>
+
+    <div id="minhas-reservas" class="my-5">
+        <h2>Minhas Reservas</h2>
+        <div class="list-group">
+            <!-- Reservas serão carregadas aqui dinamicamente -->
+            <a href="#" class="list-group-item list-group-item-action" id="reserva-template" style="display: none;">
+                <h5 class="mb-1">Nome do Quarto</h5>
+                <p class="mb-1">Data de Entrada: <span class="data-entrada"></span></p>
+                <p class="mb-1">Data de Saída: <span class="data-saida"></span></p>
+                <small>Estado da Reserva</small>
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Aqui você vai adicionar seus scripts AJAX e lógica para manipular os dados dinamicamente.
+    $(document).ready(function() {
+        // Exemplos de manipulação de dados:
+        // Carregar quartos disponíveis
+        // Carregar opções de quartos no formulário de reserva
+        // Carregar reservas do cliente
+    });
+</script>
+
+</body>
+</html>
