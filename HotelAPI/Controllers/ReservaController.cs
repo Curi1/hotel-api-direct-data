@@ -46,6 +46,24 @@ public class ReservaController : ControllerBase
 
         return reserva;
     }
+    
+    [HttpGet("ByEmail")]
+    public async Task<ActionResult<IEnumerable<Reserva>>> GetReservasByEmail(string email)
+    {
+        var reservas = await _context.Reservas
+            .Include(r => r.Cliente)
+            .Include(r => r.Quarto)
+            .Include(r => r.ReservaStatus)
+            .Where(r => r.Cliente.Email == email)
+            .ToListAsync();
+
+        if (!reservas.Any())
+        {
+            return NotFound("Nenhuma reserva encontrada para o email fornecido.");
+        }
+
+        return reservas;
+    }
 
     [HttpPost]
     public async Task<ActionResult<Reserva>> PostReserva(ReservaDTO reservaDTO)

@@ -19,6 +19,7 @@
     Cadastre-se
 </button>
 
+<!-- Modal de Cadastro de Cliente -->
 <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -47,44 +48,54 @@
     </div>
 </div>
 
-<!-- Modal de Reserva -->
-<div class="modal fade" id="reservaModal" tabindex="-1" aria-labelledby="reservaModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="reservaModalLabel">Fazer Reserva</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <form id="reservaForm">
-          <div class="mb-3">
-            <input type="hidden" id="reservaQuartoId" name="quartoId">
-            <label for="reservaStatusId" class="form-label">Status da Reserva</label>
-            <select class="form-control" id="reservaStatusId">
-              <option value="1">Reservado</option>
-              <option value="2">Confirmado</option>
-              <option value="3">Cancelado</option>
-            </select>
-          </div>
-          <div class="mb-3">
-            <label for="reservaDataEntrada" class="form-label">Data de Entrada</label>
-            <input type="date" class="form-control" id="reservaDataEntrada" required>
-          </div>
-          <div class="mb-3">
-            <label for="reservaDataSaida" class="form-label">Data de Saída</label>
-            <input type="date" class="form-control" id="reservaDataSaida" required>
-          </div>
-          <button type="submit" class="btn btn-primary">Confirmar Reserva</button>
-        </form>
-      </div>
+<!-- Modal de Edição de Cliente -->
+<div class="modal fade" id="editClienteModal" tabindex="-1" aria-labelledby="editClienteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editClienteModalLabel">Editar Dados do Cliente</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editClienteForm">
+                    <input type="hidden" id="editClienteId">
+                    <div class="mb-3">
+                        <label for="editNome" class="form-label">Nome</label>
+                        <input type="text" class="form-control" id="editNome" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editEmail" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="editEmail" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editTelefone" class="form-label">Telefone</label>
+                        <input type="text" class="form-control" id="editTelefone">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                </form>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 
 <div class="container mt-5">
     <h2>Quartos Disponíveis</h2>
     <div id="quartosList" class="row">
         <!-- Quartos serão injetados aqui via AJAX -->
+    </div>
+</div>
+
+<div class="container mt-5">
+    <h2>Consultar Minhas Reservas</h2>
+    <form id="searchReservasForm">
+        <div class="mb-3">
+            <label for="searchEmail" class="form-label">Email</label>
+            <input type="email" class="form-control" id="searchEmail" required placeholder="Digite seu email para consultar reservas">
+        </div>
+        <button type="submit" class="btn btn-primary">Buscar Reservas</button>
+    </form>
+    <div id="reservasList" class="mt-4">
+        <!-- Reservas serão injetadas aqui via AJAX -->
     </div>
 </div>
 
@@ -132,7 +143,6 @@
                 data: JSON.stringify(cliente),
                 success: function(response) {
                     alert('Cadastro realizado com sucesso!');
-                    localStorage.setItem('ClienteId', response.clienteId);
                     $('#registerModal').modal('hide');
                 },
                 error: function() {
@@ -141,36 +151,101 @@
             });
         });
 
-        $('#quartosList').on('click', '.btn-reservar', function() {
-            const quartoId = $(this).data('quarto-id');
-            $('#reservaQuartoId').val(quartoId);
-            $('#reservaModal').modal('show');
-        });
-
-        $('#reservaForm').submit(function(e) {
+        $('#searchReservasForm').submit(function(e) {
             e.preventDefault();
-            const reserva = {
-                clienteId: localStorage.getItem('ClienteId'),
-                quartoId: $('#reservaQuartoId').val(),
-                reservaStatusId: $('#reservaStatusId').val(),
-                dataEntrada: $('#reservaDataEntrada').val(),
-                dataSaida: $('#reservaDataSaida').val()
-            };
+            const email = $('#searchEmail').val();
 
             $.ajax({
-                url: '/api/reserva',
-                type: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify(reserva),
-                success: function() {
-                    alert('Reserva realizada com sucesso!');
-                    $('#reservaModal').modal('hide');
-                    loadQuartos(); // Atualizar lista de quartos
+                url: `/api/reserva/byemail?email=${email}`,
+                type: 'GET',
+                success: function(reservas) {
+                    $('#reservasList').empty();
+                    if (reservas.length === 0) {
+                        $('#reservasList').append('<p>Nenhuma reserva encontrada para este email.</p>');
+                    } else {
+                        reservas.forEach(reserva => {
+                            $('#reservasList').append(
+                                `<div class="card mb-3">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Reserva para ${reserva.cliente.nome}</h5>
+                                        <p class="card-text">Email: ${reserva.cliente.email}</p>
+                                        <p class="card-text">Telefone: ${reserva.cliente.telefone}</p>
+                                        <p class="card-text">Quarto: ${reserva.quarto.numero} - ${reserva.quarto.tipo}</p>
+                                        <p class="card-text">Preço: R$${reserva.quarto.preco.toFixed(2)}</p>
+                                        <p class="card-text">Data de Entrada: ${new Date(reserva.dataEntrada).toLocaleDateString()}</p>
+                                        <p class="card-text">Data de Saída: ${new Date(reserva.dataSaida).toLocaleDateString()}</p>
+                                        <button class="btn btn-info edit-cliente" data-cliente-id="${reserva.cliente.clienteId}" data-cliente-nome="${reserva.cliente.nome}" data-cliente-email="${reserva.cliente.email}" data-cliente-telefone="${reserva.cliente.telefone}">Editar Cliente</button>
+                                        <button class="btn btn-danger cancel-reservation" data-reserva-id="${reserva.reservaId}">Cancelar Reserva</button>
+                                    </div>
+                                </div>`
+                            );
+                        });
+                    }
                 },
                 error: function() {
-                    alert('Erro ao realizar a reserva.');
+                    alert('Erro ao buscar reservas.');
                 }
             });
+        });
+
+        $('#reservasList').on('click', '.edit-cliente', function() {
+            const clienteId = $(this).data('cliente-id');
+            const clienteNome = $(this).data('cliente-nome');
+            const clienteEmail = $(this).data('cliente-email');
+            const clienteTelefone = $(this).data('cliente-telefone');
+
+            $('#editClienteId').val(clienteId);
+            $('#editNome').val(clienteNome);
+            $('#editEmail').val(clienteEmail);
+            $('#editTelefone').val(clienteTelefone);
+
+            $('#editClienteModal').modal('show');
+        });
+
+        $('#editClienteForm').submit(function(e) {
+            e.preventDefault();
+            const clienteId = $('#editClienteId').val();
+            const cliente = {
+                ClienteId: clienteId,
+                Nome: $('#editNome').val(),
+                Email: $('#editEmail').val(),
+                Telefone: $('#editTelefone').val()
+            };
+
+            console.log("Enviando dados do cliente:", JSON.stringify(cliente));
+
+            $.ajax({
+                url: `/api/cliente/${clienteId}`,
+                type: 'PUT',
+                contentType: 'application/json',
+                data: JSON.stringify(cliente),
+                success: function() {
+                    alert('Dados do cliente atualizados com sucesso!');
+                    $('#editClienteModal').modal('hide');
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    console.log("Erro ao enviar dados:", jqXHR.responseText);
+                    alert('Erro ao atualizar dados do cliente: ' + textStatus + ' - ' + errorThrown);
+                }
+            });
+        });
+
+        $('#reservasList').on('click', '.cancel-reservation', function() {
+            const reservaId = $(this).data('reserva-id');
+
+            if (confirm('Tem certeza que deseja cancelar esta reserva?')) {
+                $.ajax({
+                    url: `/api/reserva/${reservaId}`,
+                    type: 'DELETE',
+                    success: function() {
+                        alert('Reserva cancelada com sucesso!');
+                        $(`button[data-reserva-id="${reservaId}"]`).closest('.card').remove();
+                    },
+                    error: function() {
+                        alert('Erro ao cancelar a reserva.');
+                    }
+                });
+            }
         });
 
         loadQuartos(); // Carregar quartos ao iniciar
